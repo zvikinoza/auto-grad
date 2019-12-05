@@ -1,23 +1,31 @@
-class NotImplemented(Exception):
-    def __init__(self):
-        super().__init__("Function is not implemented it's abstract")
-
-
 class Node():
+    """Base class for evry node in computational graph"""
+
     def __init__(self, name):
         self.name = name
         self._sub_nodes = []
         self._const_val = 0
 
-    def __add_sub_node(self, node):
-        self._sub_nodes.append(node)
-
     def _add_sub_nodes(self, *nodes):
+        """ add nodes in computational graph under self
+        Args:
+            nodes (iterable): iterable of Node() s
+        """
         for node in nodes:
             self.__add_sub_node(node)
 
+    def __add_sub_node(self, node):
+        self._sub_nodes.append(node)
+
     def _is_atomic(self):
         return not self._sub_nodes
+
+    def __str__(self):
+        return self.name
+
+    __repr__ = __str__
+
+    # Abstract methods
 
     def __add__(self, other):
         raise NotImplemented
@@ -27,11 +35,6 @@ class Node():
 
     def __mul__(self, other):
         raise NotImplemented
-
-    def __str__(self):
-        return self.name
-
-    __repr__ = __str__
 
 
 class Var(Node):
