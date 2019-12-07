@@ -149,7 +149,7 @@ def test_var_mult_const():
     y = Var('y')
 
     z = x * y
-    values = {'x_grad': 10, 'y_grad': 2}
+    values = {'x': 10, 'y': 2}
     z_grad = z.grad()
     z_val = z_grad.eval(values)
 

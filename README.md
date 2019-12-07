@@ -1,2 +1,2 @@
 # auto-grad
-Automatic Gradient computation Like TensorFlow and MXNet does.
+Automatic Gradient computation similar to what MXNet and Tensorflow do.
