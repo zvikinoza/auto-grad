@@ -1,10 +1,10 @@
 class Node():
     """Base class for evry node in computational graph"""
 
-    def __init__(self, name):
+    def __init__(self, name, const_val=0):
         self.name = name
         self._sub_nodes = []
-        self._const_val = 0
+        self._const_val = const_val
 
     def _add_sub_nodes(self, *nodes):
         """ add nodes in computational graph under self
@@ -17,7 +17,7 @@ class Node():
     def __add_sub_node(self, node):
         self._sub_nodes.append(node)
 
-    def _is_atomic(self):
+    def _is_leaf(self):
         return not self._sub_nodes
 
     def __str__(self):
@@ -38,8 +38,8 @@ class Node():
 
 
 class Var(Node):
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, const_val=0):
+        super().__init__(name, const_val)
 
     @classmethod
     def __init__from_var(cls, other):
@@ -49,11 +49,16 @@ class Var(Node):
         return var
 
     def eval(self, values):
-        if self._is_atomic():
+        if self._is_leaf():
             return values.get(self.name, 0) + self._const_val
         # Var always has only one sub node which always is
         # Op (operation ) node or Op's subclass
         return self._sub_nodes[0].eval(values) + self._const_val
+
+    def grad(self):
+        if self._is_leaf():
+            return Var(self.name + '_grad', 1)
+        return self._sub_nodes[0].grad()
 
     def __add__(self, other):
         if isinstance(other, Var):
@@ -127,6 +132,13 @@ class Add(Op):
         sub_vars_values = [node.eval(values) for node in self._sub_nodes]
         return sum(sub_vars_values)
 
+    def grad(self):
+        vars_grads = [var.grad() for var in self._sub_nodes]
+        sum_grad = Var('sum_grad')
+        for var_grad in vars_grads:
+            sum_grad = sum_grad + var_grad
+        return sum_grad
+
 
 class Mul(Op):
     def __init__(self, name):
@@ -138,6 +150,12 @@ class Mul(Op):
         for val in sub_vars_values[1:]:
             res *= val
         return res
+
+    def grad(self):
+        vars_grads = [var.grad() for var in self._sub_nodes]
+        mul_grad = Var('mul_grad')
+        mul_grad = self._sub_nodes[0] * vars_grads[1] + self._sub_nodes[1] * vars_grads[0]
+        return mul_grad
 
 
 class Sub(Op):
