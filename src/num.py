@@ -65,7 +65,7 @@ class NumericValue(IValue):
 
 
 
-class Value(IValue):
+class Value(NumericValue):
     def __init__(self, dat: T, children: Tuple[IValue] = (), operation: str ='') -> None:
         self.__dat = dat
         self.__grad = 0
